@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "harnessprobe",
+  "github": "https://github.com/SuperMarioYL/harnessprobe",
+  "host": "harnessprobe.lei6393.com",
+  "lang": { "primary": "zh", "toggle": true },
+  "accent": ["#6c8cff", "#7c5cff", "#34d4c0"],
+  "hero": {
+    "eyebrow": { "zh": "信创采购 · 分数透明 · 可复现", "en": "Procurement · Score Transparency · Reproducible" },
+    "headline": {
+      "zh": "同一张卷子，\n看清各家分数差多少",
+      "en": "One fair test,\nsee how every score was really made"
+    },
+    "sub": {
+      "zh": "厂商公布的分数都绑定各自的评测设定。HarnessProbe 把每家的设定还原成同一套，生成一份 apples-to-apples 的对比矩阵，采购可以逐字复跑。",
+      "en": "Every published score rides a vendor's private test setup. HarnessProbe recovers each setup, normalizes to one common set, and prints an apples-to-apples matrix procurement can re-run verbatim."
+    },
+    "command": "harnessprobe match --bench aime",
+    "cta": { "label": { "zh": "看一次对比", "en": "See a comparison" } },
+    "ctaGithub": { "label": { "zh": "GitHub", "en": "GitHub" } },
+    "scroll": { "label": { "zh": "往下看", "en": "Scroll" } }
+  },
+  "advantages": [
+    {
+      "title": { "zh": "把每家的评测设定挖出来", "en": "Surface every vendor's hidden test setup" },
+      "body": {
+        "zh": "系统提示、工具调用模板、停止符、推理强度——这些决定分数高低的设定，现在被逐家还原成一份可读的设定档案。",
+        "en": "System prompts, tool-call templates, stop tokens, reasoning effort — the knobs that decide a score are recovered per vendor into one readable profile."
+      },
+      "chips": ["› 三家设定档案", "› 可对照可质疑", "› 一键导出"]
+    },
+    {
+      "title": { "zh": "同一套题，同一套跑法", "en": "Same questions, same way to run them" },
+      "body": {
+        "zh": "把每家设定套到同一份基准题集上，跑出真正能比的匹配分数，不再是被设定拉高或压低的厂商数字。",
+        "en": "Apply each setup to the same benchmark subset and produce matched scores that actually compare — not vendor numbers inflated or muted by their own config."
+      },
+      "chips": ["› 30 题子集", "› 逐题对齐", "› 匹配分数差距矩阵"]
+    },
+    {
+      "title": { "zh": "一份能复跑的对比报告", "en": "A comparison report you can re-run" },
+      "body": {
+        "zh": "生成一份带差距矩阵的 HTML 报告，附带可逐字复跑的设定包——把报告交上去，评审照着原样再跑一遍就能核对。",
+        "en": "Get an HTML report with the gap matrix, plus a repro package — hand it to the review board and they re-run it verbatim to confirm every number."
+      },
+      "chips": ["› HTML 差距矩阵", "› 复跑设定包", "› 采购评审可核对"]
+    }
+  ],
+  "scene": { "kind": "mesh" },
+  "cta": {
+    "headline": { "zh": "采购评审，从一份能复跑的对比开始", "en": "Start procurement review with a re-runnable comparison" },
+    "sub": { "zh": "一条命令生成对比矩阵和复跑包。", "en": "One command builds the comparison matrix and repro package." },
+    "button": { "zh": "查看 GitHub", "en": "View on GitHub" }
+  },
+  "footer": { "tag": { "zh": "MIT 开源 · 信创采购级分数对比", "en": "MIT open source · procurement-grade score comparison" } }
+}
