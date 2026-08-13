@@ -51,3 +51,4 @@ htmlcov/
 
 # os
 Thumbs.db
+.spawn.*
