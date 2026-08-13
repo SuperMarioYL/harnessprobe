@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 340" width="880" height="340"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif"
+     role="img" aria-label="HarnessProbe architecture: CLI to Profile+Runner to GapMatrix+Report">
+  <defs>
+    <marker id="ah-l" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#B9B9C2"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="880" height="340" fill="#F5F5F7"/>
+  <text x="440" y="36" text-anchor="middle" font-size="15" font-weight="600" fill="#1D1D1F">per-vendor harness → matched-score GapMatrix</text>
+
+  <!-- static connectors -->
+  <g stroke="#C9C9D0" stroke-width="1.5" fill="none">
+    <line x1="250" y1="175" x2="336" y2="175" marker-end="url(#ah-l)"/>
+    <line x1="550" y1="175" x2="636" y2="175" marker-end="url(#ah-l)"/>
+  </g>
+  <!-- marching-dash data flow (rightward) -->
+  <g stroke-width="1.5" fill="none" stroke-linecap="round">
+    <line x1="250" y1="175" x2="332" y2="175" stroke="#0071E3" stroke-opacity="0.55" stroke-dasharray="6 10">
+      <animate attributeName="stroke-dashoffset" from="32" to="0" dur="1.6s" repeatCount="indefinite"/>
+    </line>
+    <line x1="550" y1="175" x2="632" y2="175" stroke="#5E5CE6" stroke-opacity="0.55" stroke-dasharray="6 10">
+      <animate attributeName="stroke-dashoffset" from="32" to="0" dur="1.6s" begin="-0.8s" repeatCount="indefinite"/>
+    </line>
+  </g>
+  <!-- animateMotion packets -->
+  <g>
+    <circle r="3.5" fill="#0071E3">
+      <animateMotion path="M250,175 L332,175" dur="2.4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" dur="2.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle r="3.5" fill="#5E5CE6">
+      <animateMotion path="M550,175 L632,175" dur="2.4s" begin="-1.2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" dur="2.4s" begin="-1.2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- nodes -->
+  <g>
+    <rect x="40" y="125" width="210" height="100" rx="15" fill="#0071E3" fill-opacity="0.10" stroke="#0071E3" stroke-width="1.5">
+      <animate attributeName="fill-opacity" values="0.10;0.18;0.10" keyTimes="0;0.5;1" dur="3.2s"
+               calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" repeatCount="indefinite"/>
+    </rect>
+    <text x="145" y="170" text-anchor="middle" font-size="16" font-weight="600" fill="#0A4F9E">CLI (typer)</text>
+    <text x="145" y="192" text-anchor="middle" font-size="12" font-weight="500" fill="#6E6E73">match · report · repro</text>
+  </g>
+  <g>
+    <rect x="340" y="125" width="210" height="100" rx="15" fill="#5E5CE6" fill-opacity="0.10" stroke="#5E5CE6" stroke-width="1.5">
+      <animate attributeName="fill-opacity" values="0.10;0.18;0.10" keyTimes="0;0.5;1" dur="3.2s" begin="-1.1s"
+               calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" repeatCount="indefinite"/>
+    </rect>
+    <text x="445" y="170" text-anchor="middle" font-size="16" font-weight="600" fill="#4B3FC4">Profile + Runner</text>
+    <text x="445" y="192" text-anchor="middle" font-size="12" font-weight="500" fill="#6E6E73">harness assumptions → AIME</text>
+  </g>
+  <g>
+    <rect x="640" y="125" width="210" height="100" rx="15" fill="#10A37F" fill-opacity="0.10" stroke="#10A37F" stroke-width="1.5">
+      <animate attributeName="fill-opacity" values="0.10;0.18;0.10" keyTimes="0;0.5;1" dur="3.2s" begin="-2.2s"
+               calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" repeatCount="indefinite"/>
+    </rect>
+    <text x="745" y="170" text-anchor="middle" font-size="16" font-weight="600" fill="#0B6B53">GapMatrix</text>
+    <text x="745" y="192" text-anchor="middle" font-size="12" font-weight="500" fill="#6E6E73">HTML report + repro-pkg</text>
+  </g>
+
+  <!-- legend row -->
+  <g font-size="11" fill="#6E6E73">
+    <rect x="60" y="275" width="14" height="14" rx="3" fill="#0071E3" fill-opacity="0.30" stroke="#0071E3" stroke-width="1"/>
+    <text x="82" y="286">command surface</text>
+    <rect x="320" y="275" width="14" height="14" rx="3" fill="#5E5CE6" fill-opacity="0.30" stroke="#5E5CE6" stroke-width="1"/>
+    <text x="342" y="286">harness + eval engine</text>
+    <rect x="580" y="275" width="14" height="14" rx="3" fill="#10A37F" fill-opacity="0.30" stroke="#10A37F" stroke-width="1"/>
+    <text x="602" y="286">matched-score output</text>
+  </g>
+  <text x="440" y="318" text-anchor="middle" font-size="11" fill="#A1A1A8">single process · OpenAI-compatible adapter · static YAML profiles (the moat)</text>
+</svg>

@@ -1,0 +1,36 @@
+# HarnessProfile — Kimi K3 (via Moonshot OpenAI-compatible API)
+# Reverse-engineered minimal-mode eval-harness assumptions. Provenance trail below.
+# Schema: see harnessprobe/profile.py HarnessProfile.
+vendor: kimi
+model_id: kimi-k3-0813
+model_name: moonshot-v1-auto
+system_prompt: "You are Kimi, an assistant created by Moonshot AI. You are excellent at step-by-step mathematical reasoning. For each problem, work through the solution methodically, verify your result, and give the final answer as a single integer between 0 and 999. Put only the final integer inside \\boxed{}."
+tool_call_template:
+  style: openai
+  trigger: ""
+  schema_shape:
+    type: function
+    function:
+      name: tool_name
+      arguments: object
+  description: "Moonshot API supports native OpenAI-style function calling; Kimi's internal prompt-template tool format is not used in minimal eval mode."
+stop_tokens:
+  - "<|im_end|>"
+  - "<|endoftext|>"
+reasoning_effort: high
+temperature: 0.0
+max_tokens: 7168
+decoding:
+  top_p: 0.92
+  frequency_penalty: 0.0
+  presence_penalty: 0.0
+provenance:
+  - "Moonshot Platform API docs (platform.moonshot.cn/docs); OpenAI-compatible /v1/chat/completions with stop, temperature, top_p."
+  - "Kimi K3 model card (moonshot.cn); K3 is Moonshot's reasoning-augmented checkpoint family with a reasoning-effort lever."
+  - "Reverse-engineered stop-token set from ChatML <|im_end|> + GPT-style <|endoftext|> fallback; reasoning_effort=high inferred from Kimi K3 published AIME repro note."
+published_score:
+  aime: 75.5
+  terminal_bench: 76.1
+base_url: "https://api.moonshot.cn/v1"
+api_key_env: MOONSHOT_API_KEY
+notes: "minimal mode = ChatML/GPT stop tokens + reasoning_effort high + top_p 0.92. The internal Kimi tool-call format shape is UNVERIFIED — best-effort reconstruction; the moonshot-v1-auto model name auto-selects the latest Kimi checkpoint."

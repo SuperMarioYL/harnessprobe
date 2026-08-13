@@ -1,0 +1,36 @@
+# HarnessProfile — Qwen3.8 (via DashScope OpenAI-compatible mode)
+# Reverse-engineered minimal-mode eval-harness assumptions. Provenance trail below.
+# Schema: see harnessprobe/profile.py HarnessProfile.
+vendor: qwen
+model_id: qwen3.8-0813
+model_name: qwen-plus
+system_prompt: "You are Qwen, a helpful and honest assistant created by Alibaba. You excel at careful mathematical reasoning. For each problem, reason step by step, double-check your arithmetic, and produce a single final integer answer in the range 0-999. Enclose only the final integer in \\boxed{}."
+tool_call_template:
+  style: openai
+  trigger: ""
+  schema_shape:
+    type: function
+    function:
+      name: tool_name
+      arguments: object
+  description: "Qwen DashScope compatible-mode honours native OpenAI tool_calls; Qwen's own Qwen-Agent XML format is not used in minimal eval mode."
+stop_tokens:
+  - "<|im_end|>"
+  - "<|endoftext|>"
+reasoning_effort: medium
+temperature: 0.0
+max_tokens: 6144
+decoding:
+  top_p: 0.9
+  frequency_penalty: 0.0
+  presence_penalty: 0.0
+provenance:
+  - "Qwen DashScope OpenAI-compatible mode docs (help.aliyun.com); compatible-mode/v1 endpoint honours stop, temperature, top_p."
+  - "Qwen3.8 model card on ModelScope; reasoning_effort lever exposed on the Qwen3 reasoning checkpoint family."
+  - "Reverse-engineered stop-token set from <|im_end|> (ChatML EOT) + <|endoftext|> (base-model fallback); reasoning_effort=medium inferred from published Qwen3 reasoning AIME run config."
+published_score:
+  aime: 77.2
+  terminal_bench: 78.4
+base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+api_key_env: DASHSCOPE_API_KEY
+notes: "minimal mode = ChatML stop tokens + reasoning_effort medium + top_p 0.9. The exact reasoning_effort mapping for Qwen3.8 (medium vs high) is UNVERIFIED — best-effort from public AIME reproduction notes; tune via harnessprobe profile edit (m3)."

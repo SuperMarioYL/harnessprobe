@@ -1,0 +1,36 @@
+# HarnessProfile — DeepSeek V4 Pro 0813
+# Reverse-engineered minimal-mode eval-harness assumptions. Provenance trail below.
+# Schema: see harnessprobe/profile.py HarnessProfile.
+vendor: deepseek
+model_id: deepseek-v4-pro-0813
+model_name: deepseek-chat
+system_prompt: "You are a careful mathematical problem solver. Read each problem completely before reasoning. Think step by step, verify your intermediate results, and only commit to a final answer once you have cross-checked it. The answer to every problem is an integer between 0 and 999 inclusive. State your final answer inside \\boxed{} so it can be graded automatically."
+tool_call_template:
+  style: openai
+  trigger: ""
+  schema_shape:
+    type: function
+    function:
+      name: tool_name
+      arguments: object
+  description: "DeepSeek harness uses the native OpenAI tool_calls channel; no XML/hermes wrappers in minimal mode."
+stop_tokens:
+  - "<|im_end|>"
+  - "<｜end▁of▁sentence｜>"
+reasoning_effort: high
+temperature: 0.0
+max_tokens: 8192
+decoding:
+  top_p: 0.95
+  frequency_penalty: 0.0
+  presence_penalty: 0.0
+provenance:
+  - "r/LocalLLaMA — DeepSeek V4 Flash 0731 Terminal-Bench 82.7% repro attempt (author u/Exciting-Camera3226); names the unreleased DeepSeek Harness minimal mode."
+  - "DeepSeek V4 Pro 0813 launch (api.deepseek.com, 2026-08-13); high-engagement HN/OpenRouter thread confirms procurement attention."
+  - "Reverse-engineered from stop-token fingerprint (<｜end▁of▁sentence｜> is the DeepSeek MoE EOT marker) and reasoning-effort lever on /chat/completions."
+published_score:
+  aime: 79.8
+  terminal_bench: 82.7
+base_url: "https://api.deepseek.com/v1"
+api_key_env: DEEPSEEK_API_KEY
+notes: "minimal mode = reasoning_effort high + greedy decoding + native tool_calls; the 82.7% Terminal-Bench figure was reported under this unpublished harness. Two vendor-internal fields (exact function-call schema shape and the internal stop-token priority order) are UNVERIFIED — best-effort reconstruction from public behavior."
