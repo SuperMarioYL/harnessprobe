@@ -1,0 +1,16 @@
+{
+  "version": "0.1.0",
+  "fixture": "Constructed local YAML profile. Real parser/schema validation and adapter mode inspection; no completion call, stub answer or benchmark score generated.",
+  "inputs": [
+    {
+      "path": "examples/presentation-profile.yaml",
+      "content": "vendor: qwen\nmodel_id: local-demo\nmodel_name: example-model\nsystem_prompt: Return a short answer.\nmax_tokens: 64\ntemperature: 0.0\nreasoning_effort: low\nstop_tokens: [END]\nbase_url: http://127.0.0.1:8000/v1\npublished_score: {}\nnotes: Constructed configuration; not a vendor benchmark claim.\n"
+    }
+  ],
+  "steps": [
+    {
+      "command": "python examples/presentation_demo.py",
+      "output": "{\n  \"model_id\": \"local-demo\",\n  \"vendor\": \"qwen\",\n  \"max_tokens\": 64,\n  \"stop_tokens\": [\n    \"END\"\n  ],\n  \"published_score\": {},\n  \"adapter_is_stub_without_key\": true,\n  \"invalid_effort_rejected\": true\n}\n"
+    }
+  ]
+}

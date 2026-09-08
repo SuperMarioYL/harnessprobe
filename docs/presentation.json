@@ -1,0 +1,90 @@
+{
+  "name": "HarnessProbe",
+  "tagline": "Make evaluation settings explicit before comparing.",
+  "architecture": {
+    "title": "Declared profiles to recorded evaluations",
+    "nodes": [
+      {
+        "title": "YAML profile",
+        "detail": "Validated declared settings"
+      },
+      {
+        "title": "Runner",
+        "detail": "Arithmetic subset prompts"
+      },
+      {
+        "title": "HTTP / stub adapter",
+        "detail": "Mode explicitly recorded"
+      },
+      {
+        "title": "Scoring matrix",
+        "detail": "Correctness and reference gap"
+      },
+      {
+        "title": "HTML / ZIP",
+        "detail": "Run summary and artifacts"
+      }
+    ],
+    "edges": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        4
+      ]
+    ]
+  },
+  "process": {
+    "title": "Validate before sending a request",
+    "steps": [
+      {
+        "title": "Load local YAML",
+        "detail": "Constructed model identifier"
+      },
+      {
+        "title": "Validate fields",
+        "detail": "64-token limit and END stop"
+      },
+      {
+        "title": "Inspect mode",
+        "detail": "No key → stub route"
+      },
+      {
+        "title": "Reject bad effort",
+        "detail": "Schema validation fails"
+      }
+    ],
+    "result": "No completion requests, generated answers or scores."
+  },
+  "integrations": {
+    "title": "Configuration and result interfaces",
+    "items": [
+      {
+        "title": "YAML",
+        "detail": "Profile input"
+      },
+      {
+        "title": "HTTP",
+        "detail": "Compatible endpoint route"
+      },
+      {
+        "title": "CLI / Python",
+        "detail": "Runner access"
+      },
+      {
+        "title": "HTML / ZIP",
+        "detail": "Reports and run material"
+      }
+    ]
+  }
+}

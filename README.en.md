@@ -1,143 +1,122 @@
-**English** | [简体中文](./README.md)
+[简体中文](README.md) | **English**
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./assets/hero-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="./assets/hero-light.svg">
-  <img src="./assets/hero-light.svg" width="880" alt="HarnessProbe — reverse-engineer vendor harness assumptions into a matched-score matrix">
+  <source media="(max-width: 640px) and (prefers-color-scheme: dark)" srcset="assets/presentation/hero-mobile-dark.svg">
+  <source media="(max-width: 640px)" srcset="assets/presentation/hero-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/presentation/hero-dark.svg">
+  <img src="assets/presentation/hero-light.svg" width="960" alt="HarnessProbe — Make evaluation settings explicit before comparing.">
 </picture>
 
-<p align="center"><sub>Reverse-engineer per-vendor eval-harness assumptions into a matched-score GapMatrix for 信创 procurement</sub></p>
+**HarnessProbe stores prompts and decoding settings in typed profiles, runs a shared arithmetic subset through compatible endpoints, and produces comparison matrices, HTML and run artifacts.**
 
-<p align="center">
-  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-0071E3" alt="license"></a>
-  <a href="https://github.com/SuperMarioYL/harnessprobe/releases"><img src="https://img.shields.io/github/v/release/SuperMarioYL/harnessprobe?color=5E5CE6" alt="release"></a>
-  <a href="https://github.com/SuperMarioYL/harnessprobe/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/SuperMarioYL/harnessprobe/test.yml?branch=main&label=tests&color=10A37F" alt="tests"></a>
-  <img src="https://img.shields.io/badge/python-3.12%2B-3776AB?logo=python&logoColor=white" alt="python">
-  <img src="https://img.shields.io/badge/matched--score-gapmatrix-5E5CE6" alt="matched-score">
-  <img src="https://img.shields.io/badge/harness--fidelity-probe-10A37F" alt="harness-fidelity">
-</p>
+`Python 3.12+` · [MIT](LICENSE) · [GitHub](https://github.com/SuperMarioYL/harnessprobe) · [Website](https://harnessprobe.lei6393.com)
 
-<p align="center"><b>DeepSeek V4 / Qwen3.8 / Kimi K3 each publish benchmark scores tied to unreleased eval-harness assumptions. HarnessProbe reverse-engineers them and runs the same benchmark subset under matched assumptions to produce a comparable matched-score gap.</b></p>
+## Why it helps
+
+Comparing evaluations requires more than a model name: system prompts, stops, temperature and output limits matter. Explicit settings make differences easier to inspect. The tool reads declared profiles; it does not discover unpublished vendor harnesses or guarantee that bundled reference scores match current official results.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./assets/atlas-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="./assets/atlas-light.svg">
-  <img src="./assets/atlas-light.svg" width="880" alt="HarnessProbe architecture: CLI to Profile+Runner to GapMatrix+Report">
+  <source media="(max-width: 640px) and (prefers-color-scheme: dark)" srcset="assets/presentation/process-mobile-dark.svg">
+  <source media="(max-width: 640px)" srcset="assets/presentation/process-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/presentation/process-dark.svg">
+  <img src="assets/presentation/process-light.svg" width="960" alt="Validate before sending a request">
 </picture>
 
-<h2><img src="https://api.iconify.design/tabler/bulb.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Why this exists</h2>
+## Architecture
 
-CN model vendors (DeepSeek, Qwen, Kimi) now ship benchmark scores tied to proprietary, unreleased "harness minimal mode" configs — DeepSeek V4 Flash 0731's 82.7% on Terminal-Bench was reported using a "DeepSeek Harness minimal mode" that has never been published. When three credible CN frontier models coexist and each score runs under different harness assumptions, **a three-way comparison under unmatched harnesses is meaningless**. 信创 procurement teams signing private-deployment contracts need apples-to-apples reproducible evidence, not vendor marketing numbers. HarnessProbe types up each vendor's system-prompt shape, tool-call template, stop-token policy, reasoning-effort, and temperature into a `HarnessProfile`, applies it to the same AIME subset, and outputs vendor-published vs matched-reproduced vs gap.
+profile.py parses a controlled YAML subset and validates it with Pydantic. runner formats problems, calls OpenAICompatAdapter and stores scored per-problem results. matrix aggregates scores and differences from declared reference scores; report writes HTML and ZIP. Without a key or endpoint, the adapter uses a deterministic stub that must be distinguished from real inference.
 
-<h2><img src="https://api.iconify.design/tabler/rocket.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Install & Quickstart</h2>
+<picture>
+  <source media="(max-width: 640px) and (prefers-color-scheme: dark)" srcset="assets/presentation/architecture-mobile-dark.svg">
+  <source media="(max-width: 640px)" srcset="assets/presentation/architecture-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/presentation/architecture-dark.svg">
+  <img src="assets/presentation/architecture-light.svg" width="960" alt="Declared profiles to recorded evaluations">
+</picture>
 
-```bash
-uv tool install harnessprobe          # or pip install harnessprobe
-export DEEPSEEK_API_KEY=... DASHSCOPE_API_KEY=... MOONSHOT_API_KEY=...
-harnessprobe match --models deepseek-v4,qwen3-8,kimi-k3 --bench aime
-```
+## Install
 
-> With no API keys set, HarnessProbe transparently enters **stub mode** — producing deterministic, vendor-differentiated stand-in scores so the whole pipeline runs end-to-end (for CI / demos / tests), but the scores are not vendor-representative. Set the three keys to switch to live mode.
-
-<details><summary>Sample output</summary>
-
-```
-                        GapMatrix — AIME (30 problems)
-┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━┓
-┃ Vendor   ┃ Model             ┃ Published ┃ Matched ┃    Gap ┃ Correct ┃ Mode ┃
-┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━╇━━━━━━┩
-│ deepseek │ deepseek-v4-pro-… │     79.80 │   70.00 │  -9.80 │   21/30 │ stub │
-│ kimi     │ kimi-k3-0813      │     75.50 │   53.33 │ -22.17 │   16/30 │ stub │
-│ qwen     │ qwen3.8-0813      │     77.20 │   46.67 │ -30.53 │   14/30 │ stub │
-└──────────┴───────────────────┴───────────┴─────────┴────────┴─────────┴──────┘
-
-Largest harness inflation: qwen/qwen3.8-0813 — published 77.20, matched 46.67, gap -30.53 pts.
-```
-
-</details>
-
-<h2><img src="https://api.iconify.design/tabler/terminal-2.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Usage</h2>
-
-Five core subcommands cover the full chain from matched reproduction to RFP-evidence export:
+Requires Python 3.12+. Installation may need network access; begin with the configuration example, which sends no requests and generates no stub answers.
 
 ```bash
-# List bundled profiles (the moat: reverse-engineered per-vendor assumption sets)
+git clone https://github.com/SuperMarioYL/harnessprobe.git
+cd harnessprobe
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
+```
+
+## Quickstart
+
+```bash
+python examples/presentation_demo.py
+```
+
+The supplied YAML declares local-demo, a 64-token limit, END stop and no reference score. Real load_profile parsing succeeds, an adapter without a key is identified as stub, and invalid reasoning_effort is rejected. The script calls neither complete nor run_match, so it produces no model scores.
+
+## Usage
+
+```bash
+# Inspect bundled profile metadata
 harnessprobe profiles
 
-# Core command: run three models on the same AIME subset, print the GapMatrix
-harnessprobe match --models deepseek-v4,qwen3-8,kimi-k3 --bench aime --n 30
+# After configuring a service and credentials, require actual requests
+harnessprobe match --models path/to/profile.yaml --bench aime --n 10 --require-live --html report.html --repro run.zip
 
-# All-in-one: match + HTML report + repro-pkg
-harnessprobe match --models deepseek-v4,qwen3-8,kimi-k3 --n 30 \
-  --html report.html --repro repro.zip
-
-# Render the HTML report from a saved match state
+# Render a report from saved summary state
 harnessprobe report --state .harnessprobe-last.json --out report.html
-
-# Export a verbatim-reproducible repro-pkg (profile + prompts + raw outputs)
-harnessprobe repro --state .harnessprobe-last.json --out repro.zip
-
-# Programmatic API: see examples/basic_usage.py
 ```
 
-`match` is the main command: after running it writes a `.harnessprobe-last.json` state file that subsequent `report` / `repro` calls can read without re-running. `--base-url` points at a private vLLM / SGLang endpoint. Full CLI reference: `harnessprobe match --help`.
+A custom YAML path can be used as a --models profile key. Only the aime benchmark path is implemented; this is not a guarantee of the complete official AIME protocol. --require-live rejects missing credentials, but inspect individual requests for failures.
 
-<h2><img src="https://api.iconify.design/tabler/photo.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Demo</h2>
+## Capabilities and integrations
 
-![demo](assets/demo.gif)
+| Component | Current behavior |
+|---|---|
+| YAML profile | Loading, field validation and metadata |
+| Compatible HTTP endpoint | System prompt, decoding settings and problem requests |
+| Arithmetic subset | Prompt formatting, integer-answer extraction and scoring |
+| GapMatrix | Scores and differences from profile reference values |
+| HTML / ZIP | Summaries and per-problem material from the run |
 
-10-minute happy path: `pip install` → `match` → `report` → `repro`. See [`docs/demo.tape`](docs/demo.tape) (vhs script, re-rendered by CI on demand).
+<picture>
+  <source media="(max-width: 640px) and (prefers-color-scheme: dark)" srcset="assets/presentation/integrations-mobile-dark.svg">
+  <source media="(max-width: 640px)" srcset="assets/presentation/integrations-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/presentation/integrations-dark.svg">
+  <img src="assets/presentation/integrations-light.svg" width="960" alt="Configuration and result interfaces">
+</picture>
 
-<h2><img src="https://api.iconify.design/tabler/adjustments.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Configuration</h2>
+## Configuration and limits
 
-HarnessProfiles are static YAML under `harnessprobe/profiles/`. Core fields:
+Requests apply model_name, system_prompt, temperature, max_tokens, stop_tokens, decoding and reasoning_effort. tool_call_template and provenance are stored metadata; the current adapter does not construct tools/function schemas from them.
 
-| Field | Type | Default | Meaning |
-|---|---|---|---|
-| `vendor` | str | — | `deepseek` / `qwen` / `kimi` |
-| `model_name` | str | — | model string sent to the OpenAI-compatible endpoint |
-| `system_prompt` | str | — | reverse-engineered minimal-mode system prompt |
-| `reasoning_effort` | str\|null | null | `low`/`medium`/`high` — reasoning-model harness lever |
-| `temperature` | float | 0.0 | eval harnesses typically use greedy decoding |
-| `stop_tokens` | list[str] | `[]` | stop-token policy (reverse-engineered fingerprint) |
-| `decoding` | dict | `{}` | top_p / presence_penalty / etc. |
-| `provenance` | list[str] | `[]` | public lead sources (reddit / card / reverse) — audit trail |
-| `published_score` | dict | `{}` | vendor-published scores (bench name → score) |
-| `api_key_env` | str | — | canonical: `DEEPSEEK_API_KEY` / `DASHSCOPE_API_KEY` / `MOONSHOT_API_KEY` |
-| `base_url` | str | — | OpenAI-compatible endpoint |
+api_key_env names the environment variable and CLI --base-url can override the endpoint. Missing keys or endpoints trigger deterministic test answers based on expected answers; those scores are unsuitable for procurement, model rankings or quality claims. published_score is an input reference and a gap does not establish a harness-caused difference.
 
-Environment variables (schema-smoke verified):
+--save stores summaries without all original responses. repro --state reruns evaluations and may contact services again rather than recovering old responses. Use --repro during match to preserve that run’s material.
 
-| Variable | Vendor | Default endpoint |
-|---|---|---|
-| `DEEPSEEK_API_KEY` | DeepSeek | `https://api.deepseek.com/v1` |
-| `DASHSCOPE_API_KEY` | Qwen | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
-| `MOONSHOT_API_KEY` | Kimi | `https://api.moonshot.cn/v1` |
+## Recorded demo
 
-> Two vendor-internal harness fields (exact function-call schema shape, internal stop-token priority) are UNVERIFIED — profiles mark them as best-effort reverse-engineering, tunable via `harnessprobe profile edit` (m3).
+A real offline configuration preflight on v0.1.0, not a benchmark. qwen is an allowed schema label and example-model is a constructed identifier; no service availability is established.
 
-<h2><img src="https://api.iconify.design/tabler/map-2.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Roadmap</h2>
+[Inputs, commands and complete output](docs/demo-results.json)
 
-- [x] **m1 — profile encoding**: `HarnessProfile` Pydantic schema; DeepSeek V4 seed profile; single-endpoint AIME run producing a matched score + gap
-- [x] **m2 — match matrix**: Qwen3.8 / Kimi K3 profiles added; 3-vendor × GapMatrix; HTML report + repro-pkg export **(v0.1 release, current)**
-- [ ] **m3 — profile editor**: interactive `harnessprobe profile edit` (probe endpoints, diff assumptions); private-endpoint probes; 信创 integrator custom-profile service
-- [ ] **Future**: full Terminal-Bench 2.1 agent reproduction (v0.2 hook, needs terminal sandbox + agent loop); quarterly per-vendor Profile Pack subscription
+[Retained terminal recording](assets/demo.gif) · [Recording script](docs/demo.tape). The replayable record above describes this example.
 
-<h2><img src="https://api.iconify.design/tabler/credit-card.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Pricing</h2>
+## Roadmap
 
-HarnessProbe's commercialization aligns with the proprietary-data moat — **the free OSS runner is the trojan horse into 30+ 信创 orgs; the accumulated per-vendor reverse-engineered profile set is what they pay for**.
+- [x] Typed profiles, compatible-endpoint runner and comparison matrix.
+- [x] HTML, run-result ZIP and summary state.
+- [ ] Interactive profile editing and more benchmark tasks.
+- [ ] Broader endpoint and protocol validation.
 
-| Tier | What's included | Price |
-|---|---|---|
-| **OSS free** | runner + 3 seed profiles + AIME matrix + HTML report + repro-pkg | ¥0 (MIT) |
-| **Profile Pack subscription** | quarterly-updated full per-vendor reverse-engineered assumption set (DeepSeek/Qwen/Kimi) + provenance + historical snapshots | ¥30k–80k / yr / integrator site license |
-| **Custom profile probing** | private-endpoint probe + one custom profile reverse-engineering engagement (m3 scope) | ¥15–30k / engagement |
-| **Enterprise license** | audited per-vendor matrix integrators cite in RFP responses | ¥50k–200k / yr / integrator |
+No deployed enterprise subscription or certified reconstruction of private vendor harnesses is provided.
 
-First paid customer segment: **信创 integrators** (中国软件 / 太极 / 神州数码) — they're contractually liable for benchmark claims in RFPs and need defensible matched scores + a `repro-pkg` they can hand to 甲方 for verbatim re-run, which they can't derive themselves (the proprietary-data moat). Billing: WeChat Pay / corporate transfer + license-key (no hosted SaaS in v0.1). See `BUILD_SETUP_NEXT_STEPS.md`.
+## Development and license
 
-<h2><img src="https://api.iconify.design/tabler/license.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> License</h2>
+```bash
+python -m pip install -e ".[dev]"
+python -m pytest
+```
 
-[MIT](./LICENSE). Issues and PRs welcome at [GitHub Issues](https://github.com/SuperMarioYL/harnessprobe/issues).
+See harnessprobe/adapters/openai_compat.py for the actual request fields.
 
-<p align="center"><sub><a href="./LICENSE">MIT</a> © 2026 SuperMarioYL</sub></p>
+[MIT](LICENSE) · [Issues](https://github.com/SuperMarioYL/harnessprobe/issues)

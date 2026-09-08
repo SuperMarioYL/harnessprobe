@@ -1,0 +1,11 @@
+vendor: qwen
+model_id: local-demo
+model_name: example-model
+system_prompt: Return a short answer.
+max_tokens: 64
+temperature: 0.0
+reasoning_effort: low
+stop_tokens: [END]
+base_url: http://127.0.0.1:8000/v1
+published_score: {}
+notes: Constructed configuration; not a vendor benchmark claim.
