@@ -75,6 +75,16 @@
         "zh": "match --repro 可以保存当次 profile、prompt 与逐题输出。",
         "en": "match --repro can preserve the run’s profiles, prompts and per-problem output."
       }
+    },
+    {
+      "title": {
+        "zh": "先检查再运行",
+        "en": "Inspect before running"
+      },
+      "body": {
+        "zh": "v0.2.0 的 profile show / validate / probe 可在不发起完整评测的情况下检查、验证配置并探测端点。",
+        "en": "The v0.2.0 profile show / validate / probe commands inspect and validate configuration and probe endpoints without a full run."
+      }
     }
   ],
   "story": {
@@ -219,6 +229,13 @@
           "en": "Run the local example"
         },
         "code": "python examples/presentation_demo.py"
+      },
+      {
+        "title": {
+          "zh": "查看与验证 profile（v0.2.0）",
+          "en": "Inspect and validate profiles (v0.2.0)"
+        },
+        "code": "harnessprobe profile show deepseek-v4\nharnessprobe profile validate path/to/profile.yaml"
       }
     ]
   },
