@@ -179,6 +179,8 @@ def load_subset(n: int | None = 30, *, path: str | None = None) -> list[AIMEProb
     A JSON override file is a list of ``{"id","problem","answer"}`` objects;
     this lets a user swap in the complete official AIME-2024 set without code.
     """
+    if n is not None and n < 1:
+        raise ValueError(f"n must be >= 1 (got {n})")
     if path:
         data = json.loads(Path(path).read_text(encoding="utf-8"))
         probs = [

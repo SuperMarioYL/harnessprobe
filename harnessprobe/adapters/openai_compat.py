@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import os
 import re
+import zlib
 from dataclasses import dataclass
 from typing import Any
 
@@ -51,6 +52,16 @@ class CompletionResult:
     def usage(self) -> dict[str, int]:
         u = self.raw.get("usage") or {}
         return {k: int(v) for k, v in u.items() if isinstance(v, (int, float))}
+
+
+def stable_gate(vendor: str, problem_id: str) -> int:
+    """Process-independent digest of ``(vendor, problem_id)`` in ``[0, 10000)``.
+
+    The stub's correctness pattern must be identical across CLI invocations
+    (same inputs → same outputs), so it is keyed on ``zlib.crc32`` rather than
+    the builtin ``hash()``, which is salt-randomized per process.
+    """
+    return zlib.crc32(f"{vendor}:{problem_id}".encode()) % 10000
 
 
 class OpenAICompatAdapter:
@@ -155,27 +166,27 @@ class OpenAICompatAdapter:
         """Deterministic plausible answer for offline / CI / demo runs.
 
         Uses the expected answer (passed via ``context``) + a per-(vendor,
-        problem-index) hash to produce a stable, vendor-differentiated accuracy
-        spread so the demo GapMatrix reads realistically. Live mode ignores
-        this path entirely. All stub outputs are clearly flagged.
+        problem-id) stable digest to produce an identical, vendor-differentiated
+        accuracy spread on every invocation, so the demo GapMatrix reads
+        realistically and stays reproducible across processes. Live mode
+        ignores this path entirely. All stub outputs are clearly flagged.
         """
         ctx = context or {}
         expected = ctx.get("expected")
-        idx = ctx.get("index", 0)
         pid = ctx.get("problem_id", "")
         vendor = self.profile.vendor
         # deterministic correctness gate keyed on (vendor, problem_id)
-        gate = abs(hash((vendor, pid))) % 10000 / 10000.0
+        gate = stable_gate(vendor, pid) / 10000.0
         target_acc = self._STUB_ACCURACY.get(vendor, 0.5)
         correct = gate < target_acc and expected is not None
         if correct:
             ans = str(expected)
         elif expected is not None:
             # deterministic wrong answer ≠ expected
-            wrong = (int(expected) + 1 + (abs(hash((vendor, pid))) % 97)) % 1000
+            wrong = (int(expected) + 1 + (stable_gate(vendor, pid) % 97)) % 1000
             ans = str(wrong)
         else:
-            ans = str(abs(hash(prompt)) % 1000)
+            ans = str(zlib.crc32(prompt.encode("utf-8")) % 1000)
         effort = self.profile.reasoning_effort or "none"
         text = (
             f"<reasoning>applying {vendor} harness profile "

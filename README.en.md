@@ -59,6 +59,11 @@ The supplied YAML declares local-demo, a 64-token limit, END stop and no referen
 # Inspect bundled profile metadata
 harnessprobe profiles
 
+# Inspect / validate / probe a single profile (v0.2.0)
+harnessprobe profile show deepseek-v4
+harnessprobe profile validate path/to/profile.yaml
+harnessprobe profile probe deepseek-v4 --base-url https://vllm.internal:8000/v1
+
 # After configuring a service and credentials, require actual requests
 harnessprobe match --models path/to/profile.yaml --bench aime --n 10 --require-live --html report.html --repro run.zip
 
@@ -105,6 +110,7 @@ A real offline configuration preflight on v0.1.0, not a benchmark. qwen is an al
 
 - [x] Typed profiles, compatible-endpoint runner and comparison matrix.
 - [x] HTML, run-result ZIP and summary state.
+- [x] Profile inspection / validation / endpoint probing (`profile show / validate / probe`, v0.2.0).
 - [ ] Interactive profile editing and more benchmark tasks.
 - [ ] Broader endpoint and protocol validation.
 

@@ -22,7 +22,7 @@ from harnessprobe.runner import MatchedRun, run_match
 from harnessprobe.matrix import GapMatrix, MatrixRow, build_matrix
 from harnessprobe.report import render_report, export_repro_pkg
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "HarnessProfile",

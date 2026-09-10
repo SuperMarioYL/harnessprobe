@@ -59,6 +59,11 @@ python examples/presentation_demo.py
 # 查看打包的 profile 元数据
 harnessprobe profiles
 
+# 检查 / 验证 / 探测单个 profile（v0.2.0）
+harnessprobe profile show deepseek-v4
+harnessprobe profile validate path/to/profile.yaml
+harnessprobe profile probe deepseek-v4 --base-url https://vllm.internal:8000/v1
+
 # 配置好对应服务和凭据后，要求真实调用
 harnessprobe match --models path/to/profile.yaml --bench aime --n 10 --require-live --html report.html --repro run.zip
 
@@ -105,6 +110,7 @@ v0.1.0 的真实离线配置预检，不是 benchmark。profile 中的 qwen 是 
 
 - [x] 类型化 profile、兼容端点 runner 和比较矩阵。
 - [x] HTML、当次结果 ZIP 和汇总状态。
+- [x] profile 检查 / 验证 / 端点探测（`profile show / validate / probe`，v0.2.0）。
 - [ ] 交互 profile 编辑与更多评测任务。
 - [ ] 更完整的服务兼容和协议验证。
 

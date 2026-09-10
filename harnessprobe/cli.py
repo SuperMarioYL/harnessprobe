@@ -9,14 +9,20 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from pathlib import Path
 from typing import Optional
 
+import httpx
 import typer
 from rich.console import Console
 from rich.table import Table
 
 from harnessprobe import __version__
+from harnessprobe.adapters.openai_compat import (
+    DEFAULT_API_KEY_ENV,
+    OpenAICompatAdapter,
+)
 from harnessprobe.matrix import GapMatrix, build_matrix
 from harnessprobe.profile import ProfileError, list_profiles, load_profile
 from harnessprobe.report import export_repro_pkg, render_report
@@ -28,6 +34,13 @@ app = typer.Typer(
     no_args_is_help=True,
     add_completion=False,
 )
+profile_app = typer.Typer(
+    name="profile",
+    help="Inspect, validate, and probe HarnessProfiles without running a match.",
+    no_args_is_help=True,
+    add_completion=False,
+)
+app.add_typer(profile_app, name="profile")
 console = Console()
 err_console = Console(stderr=True)
 
@@ -161,14 +174,19 @@ def match(
         def _prog(vendor: str, idx: int, total: int) -> None:
             err_console.print(f"  {vendor}: {idx}/{total}", highlight=False)
 
-        run = run_match(
-            profile,
-            bench=bench,
-            n=n,
-            base_url=base_url or None,
-            api_key=api_key or None,
-            progress=_prog,
-        )
+        try:
+            run = run_match(
+                profile,
+                bench=bench,
+                n=n,
+                base_url=base_url or None,
+                api_key=api_key or None,
+                progress=_prog,
+            )
+        except ValueError as e:
+            # bad --bench key or non-positive --n from runner/bench input checks
+            err_console.print(f"[red]{e}[/red]")
+            raise typer.Exit(code=2)
         runs.append(run)
         err_console.print(
             f"  -> matched {run.matched_score:.2f}% "
@@ -276,6 +294,110 @@ def profiles() -> None:
         except ProfileError as e:
             table.add_row(key, "?", f"[red]{e}[/red]", "—")
     console.print(table)
+
+
+@profile_app.command("show")
+def profile_show(
+    profile: str = typer.Argument(
+        ..., help="profile key (deepseek-v4/qwen3-8/kimi-k3) or path to a .yaml file"
+    ),
+) -> None:
+    """Print the decoded HarnessProfile — the audit view for procurement review."""
+    try:
+        p = load_profile(profile)
+    except ProfileError as e:
+        err_console.print(f"[red]profile {profile!r}:[/red] {e}")
+        raise typer.Exit(code=2)
+    console.print(f"[bold]profile[/bold] {profile}")
+    console.print(f"[bold]vendor[/bold]: {p.vendor}")
+    console.print(f"[bold]model_id[/bold]: {p.model_id}")
+    console.print(f"[bold]model_name[/bold]: {p.model_name}")
+    console.print(f"[bold]reasoning_effort[/bold]: {p.reasoning_effort or '—'}")
+    console.print(f"[bold]temperature[/bold]: {p.temperature}")
+    console.print(f"[bold]max_tokens[/bold]: {p.max_tokens}")
+    console.print(
+        f"[bold]stop_tokens[/bold]: {', '.join(p.stop_tokens) if p.stop_tokens else '—'}"
+    )
+    console.print(
+        f"[bold]decoding[/bold]: "
+        f"{json.dumps(p.decoding, ensure_ascii=False) if p.decoding else '—'}"
+    )
+    console.print(f"[bold]tool_call_template.style[/bold]: {p.tool_call_template.style}")
+    console.print(f"[bold]base_url[/bold]: {p.base_url or '—'}")
+    console.print(f"[bold]api_key_env[/bold]: {p.api_key_env or '—'}")
+    console.print(
+        f"[bold]published_score[/bold]: "
+        f"{json.dumps(p.published_score, ensure_ascii=False) if p.published_score else '—'}"
+    )
+    if p.provenance:
+        console.print("[bold]provenance[/bold]:")
+        for i, src in enumerate(p.provenance, 1):
+            console.print(f"  {i}. {src}")
+    if p.notes:
+        console.print(f"[bold]notes[/bold]: {p.notes}")
+    if p.system_prompt:
+        console.print("[bold]system_prompt[/bold]:")
+        console.print(p.system_prompt)
+
+
+@profile_app.command("validate")
+def profile_validate(
+    path: Path = typer.Argument(..., help="path to a .yaml/.yml profile file"),
+) -> None:
+    """Validate a YAML profile against the HarnessProfile schema before a run."""
+    if not path.exists():
+        err_console.print(f"[red]profile file not found:[/red] {path}")
+        raise typer.Exit(code=2)
+    try:
+        p = load_profile(str(path))
+    except ProfileError as e:
+        err_console.print(f"[red]invalid profile:[/red] {e}")
+        raise typer.Exit(code=2)
+    console.print(f"[green]OK[/green] {path} — vendor={p.vendor} model={p.model_name}")
+
+
+@profile_app.command("probe")
+def profile_probe(
+    profile: str = typer.Argument(
+        ..., help="profile key or path to a .yaml file"
+    ),
+    base_url: str = typer.Option("", "--base-url", help="override OpenAI-compatible base URL"),
+    api_key: str = typer.Option("", "--api-key", help="override API key (else env vars)"),
+) -> None:
+    """Check key presence and one live completion against the endpoint."""
+    try:
+        p = load_profile(profile)
+    except ProfileError as e:
+        err_console.print(f"[red]profile {profile!r}:[/red] {e}")
+        raise typer.Exit(code=2)
+    adapter = OpenAICompatAdapter(p, base_url=base_url or None, api_key=api_key or None)
+    env_name = p.api_key_env or DEFAULT_API_KEY_ENV.get(p.vendor, "")
+    console.print(f"[bold]vendor[/bold]: {p.vendor} · [bold]model[/bold]: {p.model_name}")
+    console.print(f"[bold]endpoint[/bold]: {adapter.base_url or '—'}")
+    if not adapter.api_key:
+        hint = f" (env {env_name} unset)" if env_name else ""
+        console.print(
+            f"[yellow]no API key{hint} — nothing to probe; runs stay in stub mode[/yellow]"
+        )
+        raise typer.Exit(code=0)
+    if not adapter.base_url:
+        console.print(
+            f"[yellow]no base URL configured for {p.vendor!r} — "
+            "set the profile base_url or pass --base-url[/yellow]"
+        )
+        raise typer.Exit(code=0)
+    console.print(f"[bold]key[/bold]: {'--api-key' if api_key else env_name}")
+    t0 = time.time()
+    try:
+        comp = adapter.complete("Reply with exactly: OK")
+    except httpx.HTTPError as e:
+        err_console.print(f"[red]probe failed:[/red] {type(e).__name__}: {e}")
+        raise typer.Exit(code=4)
+    elapsed_ms = (time.time() - t0) * 1000
+    console.print(
+        f"[green]probe ok[/green] ({elapsed_ms:.0f} ms, "
+        f"finish_reason={comp.finish_reason}) reply: {comp.text[:80]!r}"
+    )
 
 
 @app.command()
