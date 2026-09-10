@@ -22,6 +22,11 @@ All notable changes to HarnessProbe are documented here. The format follows
   the existing profile-error path. `--n 0` and negative `--n` (which silently
   ran 25 problems via list slicing) are now rejected with the same clean
   exit-2 error.
+- **Wheel build.** Removed a redundant `force-include` that duplicated
+  `harnessprobe/profiles` into the wheel a second time and crashed hatchling
+  builds (`A second file is being added ... deepseek_v4.yaml`) — the same
+  failure that broke the v0.1.0 release artifacts. `packages =
+  ["harnessprobe"]` already ships profiles and templates.
 
 ### Added
 

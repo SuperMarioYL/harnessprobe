@@ -48,10 +48,6 @@ Issues = "https://github.com/SuperMarioYL/harnessprobe/issues"
 [tool.hatch.build.targets.wheel]
 packages = ["harnessprobe"]
 
-[tool.hatch.build.targets.wheel.force-include]
-"harnessprobe/profiles" = "harnessprobe/profiles"
-"harnessprobe/templates" = "harnessprobe/templates"
-
 [tool.hatch.build.targets.sdist]
 include = [
     "harnessprobe",
