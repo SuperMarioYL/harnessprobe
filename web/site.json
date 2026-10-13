@@ -11,7 +11,8 @@
   "meta": {
     "visual_profile": "neon-particle",
     "demo_source": "docs/demo-results.json",
-    "implementation_version": "0.3.0"
+    "implementation_version": "0.3.0",
+    "content_version": "v0.3.0"
   },
   "hero": {
     "eyebrow": {
@@ -72,8 +73,8 @@
         "en": "Retain run material"
       },
       "body": {
-        "zh": "match --repro 可以保存当次 profile、prompt 与逐题输出。",
-        "en": "match --repro can preserve the run’s profiles, prompts and per-problem output."
+        "zh": "match --repro 保存当次 profile、prompt 与逐题输出；report --state 重新渲染报告时保留 provenance 审计线索。",
+        "en": "match --repro preserves the run's profiles, prompts and per-problem output; report --state re-renders the report with the provenance trail intact."
       }
     },
     {
@@ -84,6 +85,16 @@
       "body": {
         "zh": "v0.2.0 的 profile show / validate / probe 可在不发起完整评测的情况下检查、验证配置并探测端点。",
         "en": "The v0.2.0 profile show / validate / probe commands inspect and validate configuration and probe endpoints without a full run."
+      }
+    },
+    {
+      "title": {
+        "zh": "失败不计入分数",
+        "en": "Failures are never graded"
+      },
+      "body": {
+        "zh": "v0.3.0 起端点报错只作审计记录，错误文本不再被当成模型答案计分。",
+        "en": "Since v0.3.0, endpoint errors are audit-only: error text is never graded as a model answer."
       }
     }
   ],
