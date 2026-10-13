@@ -4,6 +4,41 @@ All notable changes to HarnessProbe are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [semantic versioning](https://semver.org/).
 
+## [0.3.0] - 2026-10-14
+
+### Fixed
+
+- **GitHub Release assets.** The release workflow built the wheel/sdist and
+  checksums but only called `actions/upload-artifact` — the workflow artifact
+  store — so nothing was ever attached to the GitHub Release object and v0.2.0
+  shipped `release:success` with zero downloadable assets. A new `release` job
+  now downloads the dist artifact and runs `gh release upload` (with a
+  `gh release create --generate-notes` fallback), so every tag carries its
+  wheel, sdist, and checksums.
+- **Failed completions are never graded.** `run_match` caught adapter
+  exceptions by writing `[runner error: …]` into the response and then
+  extracting an integer from it — an endpoint error like "rate-limited, retry 6"
+  could be graded as the correct answer to the problem whose expected answer is
+  6. Failed completions now keep the error string for the audit trail but are
+  recorded with `guessed=None`, `correct=False`, and a new `failed` flag (also
+  exported in the repro package), so matched scores can no longer be inflated
+  by endpoint failures.
+
+### Added
+
+- **`report --state` keeps the provenance trail.** `match` now persists each
+  matrix row's harness assumptions (`model_name`, `reasoning_effort`,
+  `temperature`, `max_tokens`, `stop_tokens`) and provenance entries into the
+  saved state, and the `report` command rebuilds the "Per-profile provenance
+  trail" section from it. Previously the documented saved-state re-render path
+  silently dropped the audit trail. State files written before v0.3.0 still
+  render — missing fields default to empty.
+
+### Changed
+
+- Version lockstep bump to 0.3.0 across `VERSION`, `pyproject.toml`,
+  `harnessprobe/__init__.py`, and `web/site.json` `meta.implementation_version`.
+
 ## [0.2.0] - 2026-09-10
 
 ### Fixed

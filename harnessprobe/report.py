@@ -116,6 +116,7 @@ def export_repro_pkg(
                         "expected": res.expected,
                         "guessed": res.guessed,
                         "correct": res.correct,
+                        "failed": res.failed,
                     }
                 )
                 zf.writestr(

@@ -29,6 +29,23 @@ jobs:
           name: dist
           path: dist/*
 
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: Attach wheel + sdist + checksums to the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "$GITHUB_REF_NAME" dist/* \
+              --repo "$GITHUB_REPOSITORY" --clobber \
+            || gh release create "$GITHUB_REF_NAME" dist/* \
+              --repo "$GITHUB_REPOSITORY" --generate-notes
+
   pypi:
     needs: build
     runs-on: ubuntu-latest

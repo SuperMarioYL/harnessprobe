@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
+import harnessprobe
 from harnessprobe.cli import app
 
 runner = CliRunner()
@@ -17,7 +18,8 @@ class TestCLI:
     def test_version(self) -> None:
         result = runner.invoke(app, ["version"])
         assert result.exit_code == 0
-        assert "0.2.0" in result.output
+        # derive from the package so the assertion never pins a stale literal
+        assert harnessprobe.__version__ in result.output
 
     def test_profiles(self) -> None:
         result = runner.invoke(app, ["profiles"])

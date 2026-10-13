@@ -28,6 +28,7 @@ class ProblemResult:
     guessed: int | None
     correct: bool
     stub: bool = False
+    failed: bool = False  # adapter raised; response holds the error, never graded
 
 
 @dataclass
@@ -86,13 +87,17 @@ def run_match(
             "index": i,
             "problem_id": prob.id,
         }
+        failed = False
         try:
             comp = adapter.complete(prompt, context=ctx)
             comp_text = comp.text
             is_stub = comp.stub
-        except Exception as e:  # noqa: BLE001 — keep the run alive, mark wrong
+        except Exception as e:  # noqa: BLE001 — keep the run alive, mark failed
             comp_text = f"[runner error: {e}]"
-        guess = aime._extract_int(comp_text)
+            failed = True
+        # The error string is never parsed for an answer: digits inside e.g.
+        # "rate-limited, retry 6" would otherwise be graded as a real guess.
+        guess = None if failed else aime._extract_int(comp_text)
         ok = guess is not None and guess == prob.answer
         if ok:
             n_correct += 1
@@ -105,6 +110,7 @@ def run_match(
                 guessed=guess,
                 correct=ok,
                 stub=is_stub,
+                failed=failed,
             )
         )
         if progress:

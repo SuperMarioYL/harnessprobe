@@ -11,7 +11,7 @@ import harnessprobe
 from harnessprobe.cli import app
 
 ROOT = Path(__file__).resolve().parent.parent
-EXPECTED = "0.2.0"
+EXPECTED = "0.3.0"
 
 runner = CliRunner()
 
@@ -32,6 +32,10 @@ def test_changelog_has_sections() -> None:
     text = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
     assert "## [0.1.0]" in text
     assert "## [0.2.0]" in text
+    assert "## [0.3.0]" in text
     # the 0.2.0 section names the fix and feature work
     assert "deterministic" in text.lower()
     assert "profile" in text.lower()
+    # the 0.3.0 section names this release's fixes
+    assert "release" in text.lower()
+    assert "error" in text.lower()

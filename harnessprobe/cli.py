@@ -11,7 +11,8 @@ import json
 import os
 import time
 from pathlib import Path
-from typing import Optional
+from types import SimpleNamespace
+from typing import Any, Optional
 
 import httpx
 import typer
@@ -55,25 +56,39 @@ def _parse_models(models: str) -> list[str]:
 
 
 def _save_state(path: Path, runs: list[MatchedRun], matrix: GapMatrix) -> None:
+    # Harness assumptions + provenance per row, so `report --state` can
+    # re-render the provenance trail without re-running the models.
+    harness_by_key = {(r.vendor, r.model_id): r.profile for r in runs}
+    matrix_entries = []
+    for r in matrix.rows:
+        entry: dict[str, Any] = {
+            "vendor": r.vendor,
+            "model_id": r.model_id,
+            "bench": r.bench,
+            "published_score": r.published_score,
+            "matched_score": r.matched_score,
+            "n_correct": r.n_correct,
+            "n_problems": r.n_problems,
+            "gap": r.gap,
+            "stub": r.stub,
+        }
+        prof = harness_by_key.get((r.vendor, r.model_id))
+        if prof is not None:
+            entry["harness"] = {
+                "model_name": prof.model_name,
+                "reasoning_effort": prof.reasoning_effort,
+                "temperature": prof.temperature,
+                "max_tokens": prof.max_tokens,
+                "stop_tokens": list(prof.stop_tokens),
+                "provenance": list(prof.provenance),
+            }
+        matrix_entries.append(entry)
     data = {
         "version": __version__,
         "bench": matrix.bench,
         "n_problems": matrix.n_problems,
         "all_stub": matrix.all_stub,
-        "matrix": [
-            {
-                "vendor": r.vendor,
-                "model_id": r.model_id,
-                "bench": r.bench,
-                "published_score": r.published_score,
-                "matched_score": r.matched_score,
-                "n_correct": r.n_correct,
-                "n_problems": r.n_problems,
-                "gap": r.gap,
-                "stub": r.stub,
-            }
-            for r in matrix.rows
-        ],
+        "matrix": matrix_entries,
         "runs": [
             {
                 "vendor": r.vendor,
@@ -94,6 +109,34 @@ def _save_state(path: Path, runs: list[MatchedRun], matrix: GapMatrix) -> None:
 
 def _load_state(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _run_rows_from_state(data: dict) -> list[Any]:
+    """Rebuild lightweight run rows for the report template's provenance section.
+
+    Only rows carrying persisted harness assumptions render the trail; state
+    files written before v0.3.0 have none and re-render exactly as v0.2.0 did.
+    Display-only reconstruction, so no profile validation happens here.
+    """
+    rows = []
+    for row in data.get("matrix", []):
+        h = row.get("harness")
+        if not h:
+            continue
+        rows.append(
+            SimpleNamespace(
+                vendor=row.get("vendor", ""),
+                model_id=row.get("model_id", ""),
+                profile=SimpleNamespace(
+                    reasoning_effort=h.get("reasoning_effort"),
+                    temperature=h.get("temperature"),
+                    max_tokens=h.get("max_tokens"),
+                    stop_tokens=h.get("stop_tokens") or [],
+                    provenance=h.get("provenance") or [],
+                ),
+            )
+        )
+    return rows
 
 
 def _print_matrix(matrix: GapMatrix) -> None:
@@ -239,7 +282,7 @@ def report(
         )
         for r in rows_data
     ]
-    html = render_report(matrix, runs=None, out=out)
+    html = render_report(matrix, runs=_run_rows_from_state(data), out=out)
     console.print(f"[green]HTML report:[/green] {out} ({len(html)} bytes)")
 
 
