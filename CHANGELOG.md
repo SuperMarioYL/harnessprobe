@@ -4,6 +4,51 @@ All notable changes to HarnessProbe are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [semantic versioning](https://semver.org/).
 
+## [0.4.0] - 2026-11-16
+
+### Fixed
+
+- **The bundled answer key was wrong.** `harnessprobe match` graded every
+  completion against a table whose answers did not match its own problem
+  statements: for the 22 statements kept from the previous set, 14 stored
+  answers were provably wrong (e.g. the sum of primes below 20 was stored as 17
+  instead of 77, the 100th term of 7, 12, 17, … as 6 instead of 502, and the
+  divisor count of 10! as 12 instead of 270), and 6 more items had no integer
+  answer in `[0, 999]` as worded. Live matched scores were therefore measured
+  against invented answers. The set is now a 30-item AIME-format practice set
+  (`AIME_PRACTICE_SUBSET`, ids `aime-practice-NN`), and
+  `tests/test_bench_key.py` recomputes every answer independently, so a wrong
+  key fails CI.
+- **`repro --state` no longer substitutes a different profile.** The state file
+  now records the profile key/path and the effective endpoint per row, and
+  `repro` reloads exactly those. Previously a run started from
+  `--models ./custom.yaml` was re-exported under the bundled vendor profile
+  (different model, prompt, published score and endpoint) with no warning. A
+  recorded profile that can no longer be loaded is now a clean exit 2, and the
+  recorded stub/live mode is preserved instead of following the current
+  environment.
+- **Saved-state input errors are clean.** `report --state` and `repro --state`
+  on an unrelated or truncated JSON document used to dump a `KeyError` /
+  `JSONDecodeError` traceback; both now print a red message and exit 2.
+- **Endpoint failure is visible and never scored as model performance.** At
+  v0.3.0 failed completions were ungraded but invisible above the per-problem
+  layer: a run in which every request failed printed a live `0.00 %` row, a
+  "largest harness inflation" claim, and exited 0. `n_failed` is now carried on
+  the run, the matrix row, the saved state, the CLI table and the HTML report;
+  no harness-inflation claim is made for a row with failures; `match` exits 5
+  after writing its artifacts when every completion for a model failed. The
+  matched-score denominator is unchanged — failures still count as incorrect.
+
+### Changed
+
+- The bundled 30-problem set is documented as an AIME-format **practice set**,
+  not the official AIME-2024 exam and not a reproduction of it. This corrects
+  the provenance claim in the v0.1.0 notes; item ids are stable identifiers,
+  not exam numbers.
+- Version lockstep bump to 0.4.0 across `VERSION`, `pyproject.toml`,
+  `harnessprobe/__init__.py`, and `web/site.json` (`meta.implementation_version`
+  and `meta.content_version`).
+
 ## [0.3.0] - 2026-10-14
 
 ### Fixed

@@ -11,8 +11,8 @@
   "meta": {
     "visual_profile": "neon-particle",
     "demo_source": "docs/demo-results.json",
-    "implementation_version": "0.3.0",
-    "content_version": "v0.3.0"
+    "implementation_version": "0.4.0",
+    "content_version": "v0.4.0"
   },
   "hero": {
     "eyebrow": {
@@ -95,6 +95,16 @@
       "body": {
         "zh": "v0.3.0 起端点报错只作审计记录，错误文本不再被当成模型答案计分。",
         "en": "Since v0.3.0, endpoint errors are audit-only: error text is never graded as a model answer."
+      }
+    },
+    {
+      "title": {
+        "zh": "答案与失败都可核对",
+        "en": "Answers and failures are auditable"
+      },
+      "body": {
+        "zh": "v0.4.0 起内置题集每题答案由测试独立重算；状态记录当次 profile 来源与端点，repro 不再替换为同厂商内置 profile；失败调用在表格和报告中单独计数，全部失败时退出码为 5。",
+        "en": "Since v0.4.0 every bundled answer is re-derived by tests; saved state records the profile source and endpoint so repro no longer substitutes the vendor's bundled profile; failed completions are counted separately in the table and report, and a total failure exits 5."
       }
     }
   ],
@@ -258,6 +268,10 @@
     {
       "zh": "stub 分数、参考分数与 gap 均不能单独支持真实模型性能结论。",
       "en": "Stub scores, reference values and gaps alone do not establish real model performance."
+    },
+    {
+      "zh": "内置 30 题是 AIME 格式练习题集，不是官方 AIME 考试；其分数不等于官方评测结果。",
+      "en": "The bundled 30 problems are an AIME-format practice set, not the official AIME exam; their scores are not official evaluation results."
     }
   ],
   "footer": {

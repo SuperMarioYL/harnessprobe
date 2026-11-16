@@ -1,1 +1,1 @@
-"""Benchmark subsets — AIME-2024 and (future) Terminal-Bench hooks."""
+"""Benchmark subsets — AIME-format practice set and (future) Terminal-Bench hooks."""

@@ -79,7 +79,7 @@ harnessprobe report --state .harnessprobe-last.json --out report.html
 |---|---|
 | YAML profile | 加载、字段验证和元数据 |
 | OpenAI 兼容 HTTP | system prompt、解码设置与题目请求 |
-| 算术子集 | 格式化问题、提取整数答案、比较标准答案 |
+| 算术子集 | 格式化问题、提取整数答案、比较标准答案（答案由测试独立重算，v0.4.0） |
 | GapMatrix | 分数及与 profile 参考值之差 |
 | HTML / ZIP | 汇总与当次逐题材料 |
 
@@ -96,7 +96,9 @@ harnessprobe report --state .harnessprobe-last.json --out report.html
 
 api_key_env 指定环境变量，base_url 可由 CLI --base-url 覆盖。缺 key 或端点时 stub 会生成基于标准答案的确定性测试输出；这些分数不能用于采购、模型排名或质量结论。published_score 只是输入参考值，gap 也不证明 harness 导致分差。
 
---save 的状态保存汇总，不含全部原始逐题响应。repro --state 会重新运行评测，可能重新请求服务，而不是恢复原始响应；要保存当次材料，在 match 时同时使用 --repro。
+内置 30 题是 AIME 格式的练习题集，不是官方 AIME 考试，也不是其复现；每题答案由测试独立重算（v0.4.0）。match 会在表格和报告中显示失败调用数，失败调用按错误计分；若某个模型的全部调用都失败，命令仍写出结果文件，但以退出码 5 结束。
+
+--save 的状态保存汇总，不含全部原始逐题响应，但会记录每行使用的 profile 来源与端点。repro --state 按这些记录重新运行评测（可能再次请求服务），不会替换成同厂商的内置 profile；要保存当次材料，在 match 时同时使用 --repro。
 
 ## 运行记录
 

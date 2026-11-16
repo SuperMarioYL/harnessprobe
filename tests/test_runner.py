@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from harnessprobe.bench.aime import (
-    AIME_2024_SUBSET,
+    AIME_PRACTICE_SUBSET,
     AIMEProblem,
     _extract_int,
     grade,
@@ -39,14 +39,14 @@ class TestAIMEGrader:
 
 class TestAIMESubset:
     def test_subset_has_30(self) -> None:
-        assert len(AIME_2024_SUBSET) == 30
+        assert len(AIME_PRACTICE_SUBSET) == 30
 
     def test_load_subset_n(self) -> None:
         assert len(load_subset(5)) == 5
         assert len(load_subset(30)) == 30
         assert len(load_subset(None)) == 30
 
-    @pytest.mark.parametrize("prob", AIME_2024_SUBSET)
+    @pytest.mark.parametrize("prob", AIME_PRACTICE_SUBSET)
     def test_all_answers_in_range(self, prob: AIMEProblem) -> None:
         assert 0 <= prob.answer <= 999, f"{prob.id} answer {prob.answer} out of AIME range"
         assert prob.problem and prob.id

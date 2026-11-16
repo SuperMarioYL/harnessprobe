@@ -79,7 +79,7 @@ A custom YAML path can be used as a --models profile key. Only the aime benchmar
 |---|---|
 | YAML profile | Loading, field validation and metadata |
 | Compatible HTTP endpoint | System prompt, decoding settings and problem requests |
-| Arithmetic subset | Prompt formatting, integer-answer extraction and scoring |
+| Arithmetic subset | Prompt formatting, integer-answer extraction and scoring (answers re-derived by tests, v0.4.0) |
 | GapMatrix | Scores and differences from profile reference values |
 | HTML / ZIP | Summaries and per-problem material from the run |
 
@@ -96,7 +96,9 @@ Requests apply model_name, system_prompt, temperature, max_tokens, stop_tokens, 
 
 api_key_env names the environment variable and CLI --base-url can override the endpoint. Missing keys or endpoints trigger deterministic test answers based on expected answers; those scores are unsuitable for procurement, model rankings or quality claims. published_score is an input reference and a gap does not establish a harness-caused difference.
 
---save stores summaries without all original responses. repro --state reruns evaluations and may contact services again rather than recovering old responses. Use --repro during match to preserve that run’s material.
+The bundled 30 problems are an AIME-format practice set, not the official AIME exam and not a reproduction of it; every answer is re-derived by tests (v0.4.0). match reports failed completions in its table and report, and counts them as incorrect; if every completion for a model failed it still writes its artifacts but exits 5.
+
+--save stores summaries without all original per-problem responses, but records the profile source and endpoint used per row. repro --state reruns the evaluation from those records (and may contact services again) instead of substituting the bundled profile for the same vendor. Use --repro during match to preserve that run’s material.
 
 ## Recorded demo
 

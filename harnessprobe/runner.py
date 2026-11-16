@@ -46,6 +46,8 @@ class MatchedRun:
     results: list[ProblemResult] = field(default_factory=list)
     elapsed_s: float = 0.0
     stub: bool = False
+    base_url: str = ""  # the endpoint actually used (CLI override > profile > vendor default)
+    n_failed: int = 0  # completions that raised; counted as incorrect, never graded
 
     @property
     def gap(self) -> float | None:
@@ -77,6 +79,7 @@ def run_match(
     adapter = OpenAICompatAdapter(profile, base_url=base_url, api_key=api_key)
     results: list[ProblemResult] = []
     n_correct = 0
+    n_failed = 0
     t0 = time.time()
 
     for i, prob in enumerate(problems):
@@ -101,6 +104,8 @@ def run_match(
         ok = guess is not None and guess == prob.answer
         if ok:
             n_correct += 1
+        if failed:
+            n_failed += 1
         results.append(
             ProblemResult(
                 problem_id=prob.id,
@@ -136,4 +141,6 @@ def run_match(
         results=results,
         elapsed_s=round(elapsed, 3),
         stub=adapter.is_stub,
+        base_url=adapter.base_url,
+        n_failed=n_failed,
     )

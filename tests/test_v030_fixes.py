@@ -55,6 +55,7 @@ class _FailingAdapter:
 
     def __init__(self, profile, *, base_url=None, api_key=None, timeout=120.0):
         self.profile = profile
+        self.base_url = base_url or ""
 
     def complete(self, prompt, *, context=None):
         raise RuntimeError("moonshot rate-limited, retry 6")
@@ -67,6 +68,7 @@ class _BoxedAdapter:
 
     def __init__(self, profile, *, base_url=None, api_key=None, timeout=120.0):
         self.profile = profile
+        self.base_url = base_url or ""
 
     def complete(self, prompt, *, context=None):
         from harnessprobe.adapters.openai_compat import CompletionResult
@@ -80,8 +82,8 @@ class _BoxedAdapter:
 
 class TestFailedCompletionsNeverGraded:
     def test_error_text_is_not_extracted_as_answer(self, monkeypatch) -> None:
-        # aime-2024-02 expects 6; the error message ends in "retry 6".
-        # v0.2.0 graded that as correct (verified repro: matched 50.0 on n=2).
+        # The error message ends in a digit ("retry 6") that the v0.2.0 code
+        # graded as an answer (verified repro: matched 50.0 on n=2).
         monkeypatch.setattr("harnessprobe.runner.OpenAICompatAdapter", _FailingAdapter)
         run = run_match(load_profile("kimi-k3"), bench="aime", n=2)
         assert all(r.failed for r in run.results)

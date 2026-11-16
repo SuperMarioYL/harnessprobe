@@ -47,11 +47,13 @@ class TestStubDeterminism:
 
     def test_stub_gate_matches_reference_digest(self) -> None:
         """The gate is the documented crc32 digest, not a per-process hash."""
-        assert stable_gate("kimi", "aime-2024-01") == (
-            zlib.crc32(b"kimi:aime-2024-01") % 10000
+        assert stable_gate("kimi", "aime-practice-01") == (
+            zlib.crc32(b"kimi:aime-practice-01") % 10000
         )
         # stable and vendor-differentiated
-        assert stable_gate("deepseek", "aime-2024-01") != stable_gate("kimi", "aime-2024-01")
+        assert stable_gate("deepseek", "aime-practice-01") != stable_gate(
+            "kimi", "aime-practice-01"
+        )
 
 
 class TestCLIErrorContracts:

@@ -66,7 +66,7 @@
       <tr>
         <th>Vendor</th><th>Model</th>
         <th class="num">Published %</th><th class="num">Matched %</th>
-        <th class="num">Gap</th><th class="num">Correct</th><th class="num">Mode</th>
+        <th class="num">Gap</th><th class="num">Correct</th><th class="num">Failed</th><th class="num">Mode</th>
       </tr>
     </thead>
     <tbody>
@@ -78,11 +78,22 @@
         <td class="num match">{{ r.matched_str }}</td>
         <td class="num {% if r.gap is none %}gap-zero{% elif r.gap < 0 %}gap-neg{% elif r.gap > 0 %}gap-pos{% else %}gap-zero{% endif %}">{{ r.gap_str }}</td>
         <td class="num">{{ r.n_correct }}/{{ r.n_problems }}</td>
+        <td class="num">{% if r.n_failed %}<span class="gap-neg">{{ r.n_failed }}</span>{% else %}—{% endif %}</td>
         <td class="num">{% if r.stub %}stub{% else %}live{% endif %}</td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
+
+  {% set failed_rows = matrix.rows | selectattr("n_failed", "gt", 0) | list %}
+  {% if failed_rows %}
+  <div class="callout">
+    <strong>Endpoint failures:</strong>
+    {% for r in failed_rows %}{{ r.vendor }} / {{ r.model_id }} — {{ r.n_failed }}/{{ r.n_problems }} completions failed{% if not loop.last %}; {% endif %}{% endfor %}.
+    Failed completions are counted as incorrect and never graded, so the matched
+    score is a lower bound here, not a measurement of model performance.
+  </div>
+  {% endif %}
 
   <p class="legend">
     Gap = matched − published. <span class="gap-neg">Negative</span> = the vendor's
@@ -92,7 +103,7 @@
   </p>
 
   {% set lg = matrix.largest_gap %}
-  {% if lg and lg.gap is not none and lg.gap < 0 %}
+  {% if lg and lg.gap is not none and lg.gap < 0 and not lg.n_failed %}
   <div class="callout">
     <strong>Largest harness inflation:</strong> {{ lg.vendor }} / {{ lg.model_id }}
     — published {{ lg.published_str }}%, matched {{ lg.matched_str }}%,

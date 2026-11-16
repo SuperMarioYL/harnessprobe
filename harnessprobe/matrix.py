@@ -29,6 +29,11 @@ class MatrixRow:
     n_problems: int
     gap: float | None  # matched - published; negative = harness-inflated
     stub: bool = False
+    n_failed: int = 0  # completions that raised; counted as incorrect, never graded
+
+    @property
+    def all_failed(self) -> bool:
+        return self.n_problems > 0 and self.n_failed >= self.n_problems
 
     @property
     def gap_str(self) -> str:
@@ -91,6 +96,7 @@ def build_matrix(runs: Iterable[MatchedRun]) -> GapMatrix:
             n_problems=r.n_problems,
             gap=r.gap,
             stub=r.stub,
+            n_failed=r.n_failed,
         )
         for r in runs
     ]
